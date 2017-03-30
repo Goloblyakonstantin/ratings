@@ -1,7 +1,7 @@
 <template>
 <ui-toolbar :loading="ifLoading" text-color="white" type="colored" :brand="brand" :title="getData.title">
   <div slot="actions">
-    <ui-icon-button color="white" has-dropdown icon="more_vert" ref="dropdownButton5" size="large" type="secondary">
+    <ui-icon-button :loading="ifLoading" color="white" has-dropdown icon="more_vert" ref="dropdownButton5" size="large" type="secondary">
       <ui-menu contain-focus has-icons slot="dropdown" :options="currentMenuOptions" @close="$refs.dropdownButton5.closeDropdown()" @select="select"></ui-menu>
     </ui-icon-button>
   </div>
@@ -53,12 +53,16 @@ export default {
   methods: {
     ...mapActions([
       'dataAddPeriod',
-      'doEditMode'
+      'doEditMode',
+      'saveData'
     ]),
     select (item) {
       switch (item.id) {
         case 'edit':
           this.doEditMode()
+          break
+        case 'save':
+          this.saveData()
           break
       }
     }

@@ -11,19 +11,19 @@
       </ul>
     </div>
     <div class="row justify-content-center">
-      <table class="table table-hover">
+      <table class="table">
         <thead class="thead-default">
           <th class="text-right">
-            Ранг
+            {{ getData.names.range }}
           </th>
           <th class="text-left">
-            Дистрибьютор
+            {{ getData.names.name }}
           </th>
           <th v-for="period in getData.names.periods" class="text-center">
             {{ period }}
           </th>
           <th>
-            <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" @click="showAddColumn">
+            <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="getData.names.period" @click="showAddColumn">
             </ui-icon-button>
             <div v-if="ifAddColumn" class="input-group input-group-sm">
               <input v-model="newPeriod" ref="newPeriodInput" class="form-control form-control-sm" :placeholder="getData.names.period" @keyup.enter="addColumn" @keyup.esc="addColumnCancel">
@@ -56,7 +56,7 @@
           </tr>
           <tr v-if="ifEditMode">
             <td colspan="2">
-              <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" @click="showAddRow">
+              <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="getData.names.name" @click="showAddRow">
               </ui-icon-button>
               <div v-if="ifAddRow" class="input-group input-group-sm">
                 <input v-model="newName" ref="newNameInput" class="form-control form-control-sm" :placeholder="getData.names.name" @keyup.enter="addRow" @keyup.esc="addRowCancel">
@@ -151,5 +151,8 @@ export default {
 }
 ul {
   list-style-type: none;
+}
+input {
+  min-width: 4em;
 }
 </style>

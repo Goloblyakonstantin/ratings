@@ -80,6 +80,13 @@ export const store = new Vuex.Store({
       ls.remove(state.tokenName)
       state.loggedIn = false
     },
+    saveData: (state) => {
+      state.loading = true
+      state.editMode = false
+      setTimeout(function () {
+        state.loading = false
+      }, 1000)
+    },
     setBackRoute: (state, payload) => {
       if (payload !== '/login') {
         state.backRoute = payload
@@ -101,6 +108,9 @@ export const store = new Vuex.Store({
     },
     logOut: ({commit}) => {
       commit('logOut')
+    },
+    saveData: ({commit}, payload) => {
+      commit('saveData', payload)
     },
     setBackRoute: ({commit}, payload) => {
       commit('setBackRoute', payload)
