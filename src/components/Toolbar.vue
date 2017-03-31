@@ -1,5 +1,5 @@
 <template>
-<ui-toolbar :loading="ifLoading" text-color="white" type="colored" :brand="brand" :title="getData.title">
+<ui-toolbar :loading="ifLoading" text-color="white" type="colored" :brand="brand" :title="getData.title" @nav-icon-click="goHome">
   <div slot="actions">
     <ui-icon-button :loading="ifLoading" color="white" has-dropdown icon="more_vert" ref="dropdownButton5" size="large" type="secondary">
       <ui-menu contain-focus has-icons slot="dropdown" :options="currentMenuOptions" @close="$refs.dropdownButton5.closeDropdown()" @select="select"></ui-menu>
@@ -43,7 +43,7 @@ export default {
     currentMenuOptions () {
       return this.menuOptions.map(x => {
         x.disabled = (
-          ((x.id === 'edit' && this.ifEditMode) || (!this.getData.title)) ||
+          (x.id === 'edit' && this.ifEditMode) ||
           (x.id === 'save' && !this.ifEditMode)
         )
         return x
@@ -56,6 +56,9 @@ export default {
       'doEditMode',
       'saveData'
     ]),
+    goHome () {
+      this.$router.push('/')
+    },
     select (item) {
       switch (item.id) {
         case 'edit':

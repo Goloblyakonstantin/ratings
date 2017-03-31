@@ -4,10 +4,8 @@ currentData<template>
       <div class="row">
         <ul class="list-group">
           <li v-if="currentData.source" class="list-group-item">
-            <span class="badge badge-default"> Источник </span> {{ currentData.source }}
-          </li>
-          <li v-if="currentData.index && currentData.index.name" class="list-group-item">
-            <span class="badge badge-default"> Показатель </span> {{ currentData.index.name }}, {{ currentData.index.unit }}
+            <span class="col-md-2 badge badge-default"> {{ currentData.source }} </span>
+            <span class="col-md-9"> {{ currentData.index.name }}, {{ currentData.index.unit }} </span>
           </li>
         </ul>
       </div>
