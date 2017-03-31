@@ -1,41 +1,41 @@
-<template>
+currentData<template>
   <div class="container">
-    <div v-if="getData.title">
+    <div v-if="currentData.title">
       <div class="row">
         <ul class="list-group">
-          <li v-if="getData.source" class="list-group-item">
-            <span class="badge badge-default"> Источник </span> {{ getData.source }}
+          <li v-if="currentData.source" class="list-group-item">
+            <span class="badge badge-default"> Источник </span> {{ currentData.source }}
           </li>
-          <li v-if="getData.index && getData.index.name" class="list-group-item">
-            <span class="badge badge-default"> Показатель </span> {{ getData.index.name }}, {{ getData.index.unit }}
+          <li v-if="currentData.index && currentData.index.name" class="list-group-item">
+            <span class="badge badge-default"> Показатель </span> {{ currentData.index.name }}, {{ currentData.index.unit }}
           </li>
         </ul>
       </div>
       <div class="row justify-content-center">
-        <table v-if="getData.names" class="table">
+        <table v-if="currentData.names" class="table">
           <thead class="thead-default">
-            <th v-if="getData.names.range" class="text-right">
-              {{ getData.names.range }}
+            <th v-if="currentData.names.range" class="text-right">
+              {{ currentData.names.range }}
             </th>
             <th class="text-left">
-              {{ getData.names.name }}
+              {{ currentData.names.name }}
             </th>
-            <th v-for="period in getData.names.periods" class="text-center">
+            <th v-for="period in currentData.names.periods" class="text-center">
               {{ period }}
             </th>
             <th>
-              <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="getData.names.period" @click="showAddColumn">
+              <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.period" @click="showAddColumn">
               </ui-icon-button>
               <div v-if="ifAddColumn" class="input-group input-group-sm">
-                <input v-model="newPeriod" ref="newPeriodInput" class="form-control form-control-sm" :placeholder="getData.names.period" @keyup.enter="addColumn" @keyup.esc="addColumnCancel">
+                <input v-model="newPeriod" ref="newPeriodInput" class="form-control form-control-sm" :placeholder="currentData.names.period" @keyup.enter="addColumn" @keyup.esc="addColumnCancel">
                 </input>
                 <button class="input-group-addon" @click="addColumn">OK</button>
               </div>
             </th>
           </thead>
           <tbody>
-            <tr  v-for="(row, i) in getData.data">
-              <td v-if="getData.names.range" class="text-right">
+            <tr  v-for="(row, i) in currentData.data">
+              <td v-if="currentData.names.range" class="text-right">
                 {{ row.range }}
               </td>
               <td class="text-left">
@@ -44,10 +44,10 @@
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
                   <div v-if="!ifEditMode">
-                    {{ value }}
+                    {{ value | beautyNumber }}
                   </div>
                   <div v-if="ifEditMode">
-                    <input v-model="getData.data[i].values[n]" class="form-control form-control-sm">
+                    <input v-model="currentData.data[i].values[n]" class="form-control form-control-sm">
                     </input>
                   </div>
                 </div>
@@ -57,10 +57,10 @@
             </tr>
             <tr v-if="ifEditMode">
               <td colspan="2">
-                <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="getData.names.name" @click="showAddRow">
+                <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.name" @click="showAddRow">
                 </ui-icon-button>
                 <div v-if="ifAddRow" class="input-group input-group-sm">
-                  <input v-model="newName" ref="newNameInput" class="form-control form-control-sm" :placeholder="getData.names.name" @keyup.enter="addRow" @keyup.esc="addRowCancel">
+                  <input v-model="newName" ref="newNameInput" class="form-control form-control-sm" :placeholder="currentData.names.name" @keyup.enter="addRow" @keyup.esc="addRowCancel">
                   </input>
                   <button class="input-group-addon" @click="addRow">OK</button>
                 </div>
@@ -70,8 +70,13 @@
         </table>
       </div>
     </div>
-    <div v-if="!getData.title">
-      Нет доступа к запрошенным данным. Обратитесь в службу поддержки
+    <div v-if="!currentData.title">
+      <p v-if="ifLoading">
+        Подождите, данные загружаются...
+      </p>
+      <p v-if="!ifLoading">
+        Нет доступа к запрошенным данным. Обратитесь в службу поддержки
+      </p>
     </div>
   </div>
 </template>
@@ -104,7 +109,14 @@ export default {
       'getData',
       'ifEditMode',
       'ifLoading'
-    ])
+    ]),
+    currentData () {
+      let res = Object.assign(this.getData)
+      if (res.data) {
+        res.data.sort((a, b) => b.values[res.names.periods.length - 1] - (a.values[res.names.periods.length - 1] || 0))
+      }
+      return res
+    }
   },
   watch: {
     'id': 'fetchData'
@@ -154,7 +166,9 @@ export default {
           }
         )
         .then((data) => {
+          const vm = this
           if (data[0]) {
+            newData.id = this.id
             newData.title = data[0].title
             newData.source = data[0].source
             newData.index = {
@@ -164,6 +178,29 @@ export default {
             newData.names = {
               name: data[0].subject_type,
               period: data[0].period_type
+            }
+            newData.saveFunc = function (data) {
+              let serializedData = data.data.map((x) => x.values.map((v, i) => {
+                return {
+                  table: data.id,
+                  subject: x.name,
+                  period: data.names.periods[i],
+                  value: v || null
+                }
+              }
+              ))
+              .reduce((r, x) => r.concat(x))
+              vm.$http.post('rating', serializedData, {options: {headers: {ContentType: 'application/json'}}})
+              .then(
+                (response) => {
+                  console.log('saved')
+                  vm.fetchData()
+                },
+                (response) => {
+                  console.log('not saved')
+                  vm.fetchData()
+                }
+              )
             }
           }
           this.loading(false)
@@ -191,7 +228,10 @@ export default {
         .map((s) => {
           return {
             name: s,
-            values: template.names.periods.map((p) => data.filter((x) => x.subject === s && x.period === p)[0].value)
+            values: template.names.periods.map((p) => {
+              let res = data.filter((x) => x.subject === s && x.period === p)
+              return (res.length > 0) ? res[0].value : null
+            })
           }
         }
         )
@@ -213,6 +253,25 @@ export default {
   },
   mounted () {
     this.fetchData()
+  },
+  filters: {
+    beautyNumber: function (value) {
+      const nullSign = '-'
+      if (!value ||
+        value === undefined ||
+        value === Infinity ||
+        value === null ||
+        ((typeof (value) !== 'string') && isNaN(value)) ||
+        value === '') {
+        return nullSign
+      } else {
+        if (typeof (value) === 'string') {
+          return value
+        } else {
+          return value.toFixed(1)
+        }
+      }
+    }
   }
 }
 </script>

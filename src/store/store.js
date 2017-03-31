@@ -68,12 +68,10 @@ export const store = new Vuex.Store({
       ls.remove(state.tokenName)
       state.loggedIn = false
     },
-    saveData: (state) => {
+    saveData: (state, payload) => {
       state.loading = true
       state.editMode = false
-      setTimeout(function () {
-        state.loading = false
-      }, 2000)
+      state.data.saveFunc(state.data)
     },
     setBackRoute: (state, payload) => {
       if (payload !== '/login') {
