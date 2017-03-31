@@ -11,6 +11,7 @@ export const store = new Vuex.Store({
     tokenName: 'jwt-token',
     loading: true,
     loggedIn: true,
+    ratings: {},
     initData: {
       title: '',
       names: {

@@ -43,7 +43,7 @@ export default {
     currentMenuOptions () {
       return this.menuOptions.map(x => {
         x.disabled = (
-          (x.id === 'edit' && this.ifEditMode) ||
+          ((x.id === 'edit' && this.ifEditMode) || (!this.getData.title)) ||
           (x.id === 'save' && !this.ifEditMode)
         )
         return x
