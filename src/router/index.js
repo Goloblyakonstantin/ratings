@@ -7,9 +7,10 @@ Vue.use(Router)
 export default new Router({
   routes: [
     {
-      path: '/',
+      path: '/rating/:id',
       name: 'TableView',
-      component: TableView
+      component: TableView,
+      props: true
     }
   ]
 })

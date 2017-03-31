@@ -24,4 +24,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+.ui-toolbar--type-colored {
+  background-color: #008696;
+}
 </style>

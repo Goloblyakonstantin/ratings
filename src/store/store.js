@@ -9,34 +9,16 @@ export const store = new Vuex.Store({
     backRoute: false,
     editMode: false,
     tokenName: 'jwt-token',
-    loading: false,
+    loading: true,
     loggedIn: true,
-    data: {
-      title: 'ТОР10 крупнейших дистрибьюторов на рынке прямых продаж ЛС (включая льготное лекарственное обеспечение)',
-      source: 'QuintilesIMS',
-      index: {
-        name: 'Доля на рынке прямых продаж ЛС',
-        unit: '%'
-      },
+    initData: {
+      title: '',
       names: {
-        'range': 'Ранг',
-        'name': 'Дистрибьютор',
-        'period': 'Год',
-        'periods': ['2016', '2015']
+        periods: []
       },
-      data: [
-        {
-          range: 1,
-          name: 'Протек',
-          values: [ 18.71, 18.43 ]
-        },
-        {
-          range: 2,
-          name: 'Катрен',
-          values: [ 18.09, 16.53 ]
-        }
-      ]
-    }
+      data: []
+    },
+    data: {}
   },
   getters: {
     checkLogIn: (state) => {
@@ -47,6 +29,9 @@ export const store = new Vuex.Store({
       return state.backRoute
     },
     getData: (state) => {
+      return state.data
+    },
+    getDataSerialized: (state) => {
       return state.data
     },
     ifEditMode: (state) => {
@@ -72,6 +57,9 @@ export const store = new Vuex.Store({
     doEditMode: (state, payload) => {
       state.editMode = true
     },
+    loading: (state, payload) => {
+      state.loading = payload
+    },
     logIn: (state, payload) => {
       ls.set(state.tokenName, payload)
       state.loggedIn = true
@@ -85,12 +73,15 @@ export const store = new Vuex.Store({
       state.editMode = false
       setTimeout(function () {
         state.loading = false
-      }, 1000)
+      }, 2000)
     },
     setBackRoute: (state, payload) => {
       if (payload !== '/login') {
         state.backRoute = payload
       }
+    },
+    setData: (state, payload) => {
+      state.data = payload || Object.assign({}, state.initData)
     }
   },
   actions: {
@@ -102,6 +93,12 @@ export const store = new Vuex.Store({
     },
     doEditMode: ({commit}, payload) => {
       commit('doEditMode', payload)
+    },
+    setData: ({commit}, payload) => {
+      commit('setData', payload)
+    },
+    loading: ({commit}, payload) => {
+      commit('loading', payload)
     },
     logIn: ({commit}, payload) => {
       commit('logIn', payload)

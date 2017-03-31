@@ -28,7 +28,7 @@ export default {
   data () {
     return {
       menuOptions,
-      brand: 'Реестры'
+      brand: 'Рейтинги'
     }
   },
   props: [

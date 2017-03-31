@@ -12,6 +12,12 @@ Vue.config.productionTip = false
 Vue.use(KeenUI)
 Vue.use(VueResource)
 
+if (process.env.NODE_ENV !== 'production') {
+  Vue.http.options.root = 'http://172.16.202.42:3005'
+} else {
+  Vue.http.options.root = '/api/v1'
+}
+
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
