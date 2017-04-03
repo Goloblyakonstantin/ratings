@@ -195,7 +195,7 @@ export default {
                   vm.fetchData()
                 },
                 (response) => {
-                  console.log('not saved')
+                  console.log('not saved', response)
                   vm.fetchData()
                 }
               )

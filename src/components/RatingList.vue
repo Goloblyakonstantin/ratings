@@ -3,7 +3,7 @@
     <div v-if="!ifEditMode">
       <div class="row justify-content-center">
         <div class="col list-group">
-          <div v-for="rating in ratingsList" class="row list-group-item">
+          <div v-for="rating in currentData" class="row list-group-item">
             <span class="col-12">
               <router-link :to="{ name: 'TableView', params: { id: rating.id }}">{{ rating.title }}</router-link>
             </span>
@@ -41,29 +41,29 @@
           </th>
         </thead>
         <tbody>
-          <tr v-for="(row, i) in ratingsList">
+          <tr v-for="(row, i) in currentData">
             <td>
-              <input v-model="ratingsList[i].source" class="form-control form-control-sm">
+              <input v-model="currentData[i].source" class="form-control form-control-sm">
               </input>
             </td>
             <td>
-              <input v-model="ratingsList[i].title" class="form-control form-control-sm">
+              <input v-model="currentData[i].title" class="form-control form-control-sm">
               </input>
             </td>
             <td>
-              <input v-model="ratingsList[i].index_name" class="form-control form-control-sm">
+              <input v-model="currentData[i].index_name" class="form-control form-control-sm">
               </input>
             </td>
             <td>
-              <input v-model="ratingsList[i].unit" class="form-control form-control-sm">
+              <input v-model="currentData[i].unit" class="form-control form-control-sm">
               </input>
             </td>
             <td>
-              <input v-model="ratingsList[i].subject_type" class="form-control form-control-sm">
+              <input v-model="currentData[i].subject_type" class="form-control form-control-sm">
               </input>
             </td>
             <td>
-              <input v-model="ratingsList[i].period_type" class="form-control form-control-sm">
+              <input v-model="currentData[i].period_type" class="form-control form-control-sm">
               </input>
             </td>
           </tr>
@@ -94,16 +94,22 @@ export default {
       'getData',
       'ifEditMode',
       'ifLoading'
-    ])
+    ]),
+    currentData () {
+      let res = Object.assign(this.getData)
+      return res.data
+    }
   },
   methods: {
     ...mapActions([
+      'dataAdd',
       'loading',
       'setData'
     ]),
     fetchData () {
       this.loading(true)
       this.setData()
+      let newData = this.getData
       this.$http.get('ratings')
         .then(
           (response) => {
@@ -114,12 +120,37 @@ export default {
           }
         )
         .then((data) => {
-          this.ratingsList = data
+          const vm = this
+          newData.data = data
+          newData.saveFunc = function (data) {
+            let serializedData = data.data
+            vm.$http.post('ratings', serializedData, {options: {headers: {ContentType: 'application/json'}}})
+            .then(
+              (response) => {
+                console.log('saved')
+                vm.fetchData()
+              },
+              (response) => {
+                console.log('not saved', response)
+                vm.fetchData()
+              }
+            )
+          }
+          this.setData(newData)
           this.loading(false)
         })
     },
     addRow () {
-      this.ratingsList.push({})
+      const newRow = {
+        id: null,
+        title: '',
+        source: '',
+        index_name: '',
+        unit: '',
+        subject_type: '',
+        period_type: ''
+      }
+      this.dataAdd(newRow)
     }
   },
   beforeMount () {

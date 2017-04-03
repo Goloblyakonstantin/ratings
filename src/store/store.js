@@ -46,6 +46,9 @@ export const store = new Vuex.Store({
     }
   },
   mutations: {
+    dataAdd: (state, payload) => {
+      state.data.data.push(payload)
+    },
     dataAddName: (state, payload) => {
       let newRow = {name: payload}
       newRow.values = state.data.names.periods.map(x => null)
@@ -84,6 +87,9 @@ export const store = new Vuex.Store({
     }
   },
   actions: {
+    dataAdd: ({commit}, payload) => {
+      commit('dataAdd', payload)
+    },
     dataAddName: ({commit}, payload) => {
       commit('dataAddName', payload)
     },
