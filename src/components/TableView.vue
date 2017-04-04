@@ -1,4 +1,4 @@
-currentData<template>
+<template>
   <div class="container">
     <div v-if="currentData.title">
       <div class="row">

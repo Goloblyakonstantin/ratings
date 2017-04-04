@@ -83,6 +83,7 @@ export const store = new Vuex.Store({
       }
     },
     setData: (state, payload) => {
+      state.editMode = !(payload)
       state.data = payload || Object.assign({}, state.initData)
     }
   },
