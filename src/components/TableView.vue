@@ -146,7 +146,13 @@ export default {
         res.data.map((x, n) => {
           x.calculated = x.values.map((v, i) => {
             return {
-              gain: ((i) ? (v || 0) - (x.values[i - 1] || 0) : 0),
+              gain: ((i && v)
+              ? v - (
+                x.values.filter((x1, i1) => (i1 < i) && (x1))
+                .reduce((r1, x1) => x1, v) || 0
+              )
+              : 0
+              ),
               range: res.data.filter((p) => p.values[i] > v).length + 1
             }
           })
@@ -193,9 +199,6 @@ export default {
       return ((+value) < 0)
     },
     setFocus (refname) {
-      // console.log(this.$refs[refname].$children[0].$el.nextElementSibling)
-      // this.$refs[refname].focus()
-      // this.$refs[refname].select()
       this.$refs[refname].$children[0].$el.nextElementSibling.focus()
       this.$refs[refname].$children[0].$el.nextElementSibling.select()
     },
@@ -358,9 +361,9 @@ export default {
         return 0
       } else {
         if (valNumber > 0) {
-          return '↗ ' + (Math.abs(value)).toFixed(2)
+          return '↗' + (Math.abs(value)).toFixed(2)
         } else {
-          return '↘ ' + (Math.abs(value)).toFixed(2)
+          return '↘' + (Math.abs(value)).toFixed(2)
         }
       }
     }
@@ -392,5 +395,8 @@ ul {
 }
 input {
   min-width: 4em;
+}
+td {
+  min-width: 10em;
 }
 </style>
