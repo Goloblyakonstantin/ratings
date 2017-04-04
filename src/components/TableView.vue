@@ -42,7 +42,11 @@ currentData<template>
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
                   <div v-if="!ifEditMode">
+                    <span class="badge badge-default">
+                      {{ row.calculated[n].range }}
+                    </span>
                     {{ value | beautyNumber }}
+                    <span v-if="(row.calculated[n].gain)" :class="{gain: true, negative: isNegative(row.calculated[n].gain)}"> {{ row.calculated[n].gain | gain }} </span>
                   </div>
                   <div v-if="ifEditMode">
                     <input v-model="currentData.data[i].values[n]" class="form-control form-control-sm">
@@ -110,8 +114,23 @@ export default {
     ]),
     currentData () {
       let res = Object.assign(this.getData)
-      if (res.data) {
-        res.data.sort((a, b) => b.values[res.names.periods.length - 1] - (a.values[res.names.periods.length - 1] || 0))
+      if (res.data && res.names && res.names.periods && res.names.periods.length > 0) {
+        res.period_val = res.names.periods.map((x, i) => {
+          let pv = {}
+          pv.min = res.data.reduce((r, p) => Math.min((p.values[i] || 0), r), 0)
+          pv.max = res.data.reduce((r, p) => Math.max((p.values[i] || 0), r), 0)
+          return pv
+        })
+        res.data.map((x, n) => {
+          x.calculated = x.values.map((v, i) => {
+            return {
+              gain: ((i) ? (v || 0) - (x.values[i - 1] || 0) : 0),
+              range: res.data.filter((p) => p.values[i] > v).length + 1
+            }
+          })
+          return x
+        })
+        // res.data.sort((a, b) => b.values[res.names.periods.length - 1] - (a.values[res.names.periods.length - 1] || 0))
       }
       return res
     }
@@ -145,6 +164,9 @@ export default {
     addRowCancel () {
       this.ifAddRow = false
       this.newName = ''
+    },
+    isNegative (value) {
+      return ((+value) < 0)
     },
     setFocus (refname) {
       this.$refs[refname].focus()
@@ -266,7 +288,21 @@ export default {
         if (typeof (value) === 'string') {
           return value
         } else {
-          return value.toFixed(1)
+          return value.toFixed(2)
+        }
+      }
+    },
+    gain: function (value) {
+      const valNumber = +value || 0
+      if (valNumber === undefined ||
+        valNumber === Infinity ||
+        valNumber === null) {
+        return 0
+      } else {
+        if (valNumber > 0) {
+          return '↗ ' + (Math.abs(value)).toFixed(2)
+        } else {
+          return '↘ ' + (Math.abs(value)).toFixed(2)
         }
       }
     }
@@ -284,6 +320,14 @@ export default {
 }
 .badge {
   margin-right: 1em;
+}
+.gain {
+  vertical-align: super;
+  font-size: 0.7em;
+  color: green;
+}
+.negative {
+  color: red;
 }
 ul {
   list-style-type: none;

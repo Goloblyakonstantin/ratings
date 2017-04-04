@@ -143,12 +143,12 @@ export default {
     addRow () {
       const newRow = {
         id: null,
-        title: '',
-        source: '',
-        index_name: '',
-        unit: '',
-        subject_type: '',
-        period_type: ''
+        title: null,
+        source: null,
+        index_name: null,
+        unit: null,
+        subject_type: null,
+        period_type: null
       }
       this.dataAdd(newRow)
     }
