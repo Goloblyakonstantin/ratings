@@ -25,8 +25,14 @@ currentData<template>
               <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.period" @click="showAddColumn">
               </ui-icon-button>
               <div v-if="ifAddColumn" class="input-group input-group-sm">
-                <input v-model="newPeriod" ref="newPeriodInput" class="form-control form-control-sm" :placeholder="currentData.names.period" @keyup.enter="addColumn" @keyup.esc="addColumnCancel">
-                </input>
+                <ui-autocomplete
+                    floating-label
+                    ref="newPeriodInput"
+                    :minChars="(1)"
+                    :placeholder="currentData.names.period"
+                    :suggestions="availablePeriods"
+                    v-model="newPeriod"
+                ></ui-autocomplete>
                 <button class="input-group-addon" @click="addColumn">OK</button>
               </div>
             </th>
@@ -62,8 +68,14 @@ currentData<template>
                 <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.name" @click="showAddRow">
                 </ui-icon-button>
                 <div v-if="ifAddRow" class="input-group input-group-sm">
-                  <input v-model="newName" ref="newNameInput" class="form-control form-control-sm" :placeholder="currentData.names.name" @keyup.enter="addRow" @keyup.esc="addRowCancel">
-                  </input>
+                  <ui-autocomplete
+                      floating-label
+                      ref="newNameInput"
+                      :minChars="(1)"
+                      :placeholder="currentData.names.name"
+                      :suggestions="availableSubjects"
+                      v-model="newName"
+                  ></ui-autocomplete>
                   <button class="input-group-addon" @click="addRow">OK</button>
                 </div>
               </td>
@@ -103,7 +115,11 @@ export default {
         }
       ],
       newPeriod: '',
-      newName: ''
+      newName: '',
+      periodList: [],
+      periodType: '',
+      subjectList: [],
+      subjectType: ''
     }
   },
   computed: {
@@ -112,6 +128,12 @@ export default {
       'ifEditMode',
       'ifLoading'
     ]),
+    availableSubjects () {
+      return this.subjectList.filter((x) => this.getData.data.filter((y) => y.name === x).length === 0)
+    },
+    availablePeriods () {
+      return this.periodList.filter((x) => this.getData.names.periods.filter((y) => y === x).length === 0)
+    },
     currentData () {
       let res = Object.assign(this.getData)
       if (res.data && res.names && res.names.periods && res.names.periods.length > 0) {
@@ -136,7 +158,9 @@ export default {
     }
   },
   watch: {
-    'id': 'fetchData'
+    'id': 'fetchData',
+    'subjectType': 'fetchSubjectList',
+    'periodType': 'fetchPeriodList'
   },
   methods: {
     ...mapActions([
@@ -169,8 +193,11 @@ export default {
       return ((+value) < 0)
     },
     setFocus (refname) {
-      this.$refs[refname].focus()
-      this.$refs[refname].select()
+      // console.log(this.$refs[refname].$children[0].$el.nextElementSibling)
+      // this.$refs[refname].focus()
+      // this.$refs[refname].select()
+      this.$refs[refname].$children[0].$el.nextElementSibling.focus()
+      this.$refs[refname].$children[0].$el.nextElementSibling.select()
     },
     fetchData () {
       this.loading(true)
@@ -222,8 +249,9 @@ export default {
                 }
               )
             }
+            this.subjectType = newData.names.name
+            this.periodType = newData.names.period
           }
-          this.loading(false)
         })
         .then(
           this.$http.get('rating?table=eq.' + this.id)
@@ -237,9 +265,39 @@ export default {
           )
           .then((data) => {
             this.setData(this.dataDeserialize(newData, data))
-            this.loading(false)
           })
         )
+        .then(
+          this.loading(false)
+        )
+    },
+    fetchPeriodList () {
+      this.$http.get('periods?period_type=eq.' + this.periodType)
+      .then(
+        (response) => {
+          return response.json()
+        },
+        (response) => {
+          console.log('http error: ', response)
+        }
+      )
+      .then((data) => {
+        this.periodList = data.map((x) => x.period)
+      })
+    },
+    fetchSubjectList () {
+      this.$http.get('subjects?subject_type=eq.' + this.subjectType)
+      .then(
+        (response) => {
+          return response.json()
+        },
+        (response) => {
+          console.log('http error: ', response)
+        }
+      )
+      .then((data) => {
+        this.subjectList = data.map((x) => x.subject)
+      })
     },
     dataDeserialize (template, data) {
       template.names.periods = Array.from(new Set(data.map(x => x.period))).sort((a, b) => (a > b) ? 1 : -1)
