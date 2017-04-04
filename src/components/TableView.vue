@@ -47,7 +47,7 @@
               </td>
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
-                  <div v-if="!ifEditMode">
+                  <div v-if="!ifEditMode" class="table-value">
                     <span class="badge badge-default">
                       {{ row.calculated[n].range }}
                     </span>
@@ -390,13 +390,13 @@ export default {
 .negative {
   color: red;
 }
+.table-value {
+  min-width: 8em;
+}
 ul {
   list-style-type: none;
 }
 input {
   min-width: 4em;
-}
-td {
-  min-width: 10em;
 }
 </style>
