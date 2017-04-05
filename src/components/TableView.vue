@@ -50,7 +50,7 @@
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
                   <div v-if="!ifEditMode" class="table-value">
-                    <span class="badge badge-default">
+                    <span v-if="(row.calculated[n].range)" class="badge badge-default">
                       {{ row.calculated[n].range }}
                     </span>
                     {{ value | beautyNumber }}
@@ -152,7 +152,7 @@ export default {
               )
               : 0
               ),
-              range: res.data.filter((p) => p.values[i] > v).length + 1
+              range: res.data.filter((p) => (p.values[i]) && (p.values[i] >= v)).length
             }
           })
           return x
