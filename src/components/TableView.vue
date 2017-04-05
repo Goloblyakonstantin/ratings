@@ -9,7 +9,7 @@
           </li>
         </ul>
       </div>
-      <div class="row justify-content-center">
+      <div class="row justify-content-center scroll-x">
         <table v-if="currentData.names" class="table">
           <thead class="thead-default">
             <th v-if="currentData.names.range" class="text-right">
@@ -50,14 +50,14 @@
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
                   <div v-if="!ifEditMode" class="table-value">
-                    <span v-if="(row.calculated[n].range)" class="badge badge-default">
+                    <span v-if="(value)" class="badge badge-default">
                       {{ row.calculated[n].range }}
                     </span>
                     {{ value | beautyNumber }}
                     <span v-if="(row.calculated[n].gain)" :class="{gain: true, negative: isNegative(row.calculated[n].gain)}"> {{ row.calculated[n].gain | gain }} </span>
                   </div>
                   <div v-if="ifEditMode">
-                    <input v-model="currentData.data[i].values[n]" class="form-control form-control-sm">
+                    <input v-model="currentData.data[i].values[n]" type="number" step=0.01 class="form-control form-control-sm">
                     </input>
                   </div>
                 </div>
@@ -170,6 +170,7 @@ export default {
     ...mapActions([
       'dataAddName',
       'dataAddPeriod',
+      'doEditMode',
       'loading',
       'setData'
     ]),
@@ -245,8 +246,8 @@ export default {
                   vm.fetchData()
                 },
                 (response) => {
-                  console.log('not saved', response)
-                  vm.fetchData()
+                  vm.doEditMode(true)
+                  vm.loading(false)
                 }
               )
             }
@@ -314,6 +315,7 @@ export default {
           }
         }
         )
+        .sort((a, b) => b.values[0] - a.values[0])
       )
       return template
     },
@@ -387,6 +389,9 @@ export default {
 }
 .negative {
   color: red;
+}
+.scroll-x {
+  overflow-x: auto;
 }
 .table-value {
   min-width: 8em;
