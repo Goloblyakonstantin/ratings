@@ -61,6 +61,12 @@ export const store = new Vuex.Store({
     doEditMode: (state, payload) => {
       state.editMode = true
     },
+    loadData: (state, payload) => {
+      state.data = (state.data.loadFunc !== undefined)
+      ? state.data.loadFunc()
+      : Object.assign({}, state.initData)
+      state.loading = false
+    },
     loading: (state, payload) => {
       state.loading = payload
     },
@@ -75,7 +81,9 @@ export const store = new Vuex.Store({
     saveData: (state, payload) => {
       state.loading = true
       state.editMode = false
-      state.data.saveFunc(state.data)
+      if (payload) {
+        state.data.saveFunc(state.data)
+      }
     },
     setBackRoute: (state, payload) => {
       if (payload !== '/login') {
@@ -102,6 +110,9 @@ export const store = new Vuex.Store({
     },
     setData: ({commit}, payload) => {
       commit('setData', payload)
+    },
+    loadData: ({commit}, payload) => {
+      commit('loadData', payload)
     },
     loading: ({commit}, payload) => {
       commit('loading', payload)

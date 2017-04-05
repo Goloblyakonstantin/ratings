@@ -18,10 +18,7 @@
             <th class="text-left">
               {{ currentData.names.name }}
             </th>
-            <th v-for="period in currentData.names.periods" class="text-center">
-              {{ period }}
-            </th>
-            <th>
+            <th v-if="ifEditMode">
               <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.period" @click="showAddColumn">
               </ui-icon-button>
               <div v-if="ifAddColumn" class="input-group input-group-sm">
@@ -36,6 +33,9 @@
                 <button class="input-group-addon" @click="addColumn">OK</button>
               </div>
             </th>
+            <th v-for="period in currentData.names.periods" class="text-center">
+              {{ period }}
+            </th>
           </thead>
           <tbody>
             <tr  v-for="(row, i) in currentData.data">
@@ -44,6 +44,8 @@
               </td>
               <td class="text-left">
                 {{ row.name }}
+              </td>
+              <td v-if="ifEditMode">
               </td>
               <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
                 <div>
@@ -59,8 +61,6 @@
                     </input>
                   </div>
                 </div>
-              </td>
-              <td>
               </td>
             </tr>
             <tr v-if="ifEditMode">
@@ -146,10 +146,9 @@ export default {
         res.data.map((x, n) => {
           x.calculated = x.values.map((v, i) => {
             return {
-              gain: ((i && v)
+              gain: ((v)
               ? v - (
-                x.values.filter((x1, i1) => (i1 < i) && (x1))
-                .reduce((r1, x1) => x1, v) || 0
+                x.values.filter((v1, i1) => (i1 > i) && (v1))[0] || v
               )
               : 0
               ),
@@ -158,7 +157,6 @@ export default {
           })
           return x
         })
-        // res.data.sort((a, b) => b.values[res.names.periods.length - 1] - (a.values[res.names.periods.length - 1] || 0))
       }
       return res
     }
@@ -303,7 +301,7 @@ export default {
       })
     },
     dataDeserialize (template, data) {
-      template.names.periods = Array.from(new Set(data.map(x => x.period))).sort((a, b) => (a > b) ? 1 : -1)
+      template.names.periods = Array.from(new Set(data.map(x => x.period))).sort((a, b) => (a < b) ? 1 : -1)
       let subjects = Array.from(new Set(data.map(x => x.subject)))
       template.data = Array.from(subjects
         .map((s) => {

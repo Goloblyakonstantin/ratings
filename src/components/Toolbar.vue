@@ -21,6 +21,11 @@ const menuOptions = [
     id: 'save',
     icon: 'save',
     label: 'Сохранить'
+  },
+  {
+    id: 'clear',
+    icon: 'clear',
+    label: 'Не сохранять'
   }
 ]
 
@@ -43,6 +48,7 @@ export default {
     currentMenuOptions () {
       return this.menuOptions.map(x => {
         x.disabled = (
+          (x.id === 'clear' && true) ||
           (x.id === 'edit' && this.ifEditMode) ||
           (x.id === 'save' && !this.ifEditMode)
         )
@@ -54,7 +60,8 @@ export default {
     ...mapActions([
       'dataAddPeriod',
       'doEditMode',
-      'saveData'
+      'saveData',
+      'loadData'
     ]),
     goHome () {
       this.$router.push('/')
@@ -65,7 +72,7 @@ export default {
           this.doEditMode()
           break
         case 'save':
-          this.saveData()
+          this.saveData(true)
           break
       }
     }
