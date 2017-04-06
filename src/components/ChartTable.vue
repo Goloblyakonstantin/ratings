@@ -48,14 +48,14 @@
             y="0"
             :width="scaled.x.bandwidth()"
             :height="scaled.y.bandwidth()"
-            :fill="hslaColor(item.value)"
+            :fill="hslaColor(item[value])"
             >
             </rect>
             <text
             :key="'text' + item.period + item.subject"
             :x="scaled.x.bandwidth() / 2"
             :y="scaled.y.bandwidth() / 2"
-            dy=".35em"> {{item.value}}
+            dy=".35em"> {{item[value]}}
             </text>
           </g>
         </g>
@@ -87,7 +87,7 @@ export default {
     return {
       data: [],
       margin: {
-        left: 100,
+        left: 120,
         top: 30
       },
       currRating: 1,
@@ -114,10 +114,10 @@ export default {
       return this.data.filter((x) => (x.id === this.ratings[this.currRating]))
     },
     maxValue () {
-      return d3.max(this.currentData.map((x) => x.value))
+      return d3.max(this.currentData.map((x) => x[this.value]))
     },
     minValue () {
-      return d3.min(this.currentData.filter(x => (x.value)).map((x) => x.value))
+      return d3.min(this.currentData.filter(x => (x[this.value])).map((x) => x[this.value]))
     },
     period () {
       return (Array.from(new Set(this.data.map(x => x.period))))
@@ -208,7 +208,8 @@ export default {
   transition: 1s;
 }
 .chart .axis {
-  font-size: 0.6em;
+  font-size: 0.7em;
+  font-weight: bold;
   transition: 1s;
 }
 .chart .axis--y text {
