@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
+import Chart from '@/components/Chart'
 import RatingList from '@/components/RatingList'
 import TableView from '@/components/TableView'
 
@@ -11,6 +12,12 @@ export default new Router({
       path: '/',
       name: 'RatingList',
       component: RatingList,
+      props: true
+    },
+    {
+      path: '/chart',
+      name: 'Chart',
+      component: Chart,
       props: true
     },
     {
