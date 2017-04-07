@@ -3,7 +3,9 @@
   ref="container"
   class="container">
     <div class="row">
-      <h3>{{ axis.z[currZ] }}</h3>
+      <transition name="fade" mode="out-in">
+        <h3>{{ axis.z[currZ] }}</h3>
+      </transition>
     </div>
     <svg class="chart" :width="chartSize.width" :height="chartSize.height">
       <g>
@@ -45,27 +47,29 @@
           </g>
         </g>
         <g class="mainChartArea">
-          <g v-for="(item, i) in currentData"
-          :key="item[item[axisX]] + item[item[axisY]]"
-          :transform="'translate(' + scaled.x(item[axisX]) + ',' + scaled.y(item[axisY]) + ')'"
-          :height="scaled.y.bandwidth()"
-          >
-            <rect
-            :key="'rect:' + item[item[axisX]] + item[item[axisY]]"
-            :x="0"
-            y="0"
-            :width="scaled.x.bandwidth()"
+          <transition-group tag="g" onerror="" name="fade">
+            <g v-for="(item, i) in currentData"
+            :key="item[axisX] + item[axisY]"
+            :transform="'translate(' + scaled.x(item[axisX]) + ',' + scaled.y(item[axisY]) + ')'"
             :height="scaled.y.bandwidth()"
-            :fill="hslaColor(item)"
             >
-            </rect>
-            <text
-            :key="'text:' + item[item[axisX]] + item[item[axisY]]"
-            :x="scaled.x.bandwidth() / 2"
-            :y="scaled.y.bandwidth() / 2"
-            dy=".35em"> {{item[value]}}
-            </text>
-          </g>
+              <rect
+              :key="'rect:' + item[axisX] + item[axisY]"
+              :x="0"
+              y="0"
+              :width="scaled.x.bandwidth()"
+              :height="scaled.y.bandwidth()"
+              :fill="hslaColor(item)"
+              >
+              </rect>
+              <text
+              :key="'text:' + item[axisX] + item[axisY]"
+              :x="scaled.x.bandwidth() / 2"
+              :y="scaled.y.bandwidth() / 2"
+              dy=".35em"> {{item[value]}}
+              </text>
+            </g>
+          </transition-group>
         </g>
       </g>
     </svg>
@@ -269,5 +273,14 @@ export default {
 }
 .chart .axis--y text {
   text-anchor: end;
+}
+h3 {
+  transition: 1s;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: 1s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0
 }
 </style>
