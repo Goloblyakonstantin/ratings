@@ -16,7 +16,7 @@
           :height="scaled.y.bandwidth()"
           >
             <text
-            :key="'y text:'+item"
+            :key="'ytext:'+item"
             :x="margin.left"
             dx="-0.35em"
             :y="scaled.y.bandwidth() / 2"
@@ -27,24 +27,26 @@
           </g>
         </g>
         <g class="axis axis--x">
-          <g v-for="(item, i) in axis.x"
-          :key="'x:'+item"
-          :transform="'translate(' + scaled.x(item) + ', 0)'"
-          :height="scaled.y.bandwidth()"
-          >
-            <text
-            :key="'x text:'+item"
-            :x="scaled.x.bandwidth() / 2"
-            :y="scaled.y.bandwidth() / 2"
-            dy=".35em"
-            @mouseover="selected(axisX, item)">
-              <tspan v-for="(part, part_i) in splitText(item, 20)"
+          <transition-group tag="g" onerror="" name="fade">
+            <g v-for="(item, i) in axis.x"
+            :key="'x:'+item"
+            :transform="'translate(' + scaled.x(item) + ', 0)'"
+            :height="scaled.y.bandwidth()"
+            >
+              <text
+              :key="'xtext:'+item"
               :x="scaled.x.bandwidth() / 2"
-              :y="margin.top"
-              :dy="(-part_i - 1) + 'em'"
-              >{{part}}</tspan>
-            </text>
-          </g>
+              :y="scaled.y.bandwidth() / 2"
+              dy=".35em"
+              @mouseover="selected(axisX, item)">
+                <tspan v-for="(part, part_i) in splitText(item, 20)"
+                :x="scaled.x.bandwidth() / 2"
+                :y="margin.top"
+                :dy="(-part_i - 1) + 'em'"
+                >{{part}}</tspan>
+              </text>
+            </g>
+          </transition-group>
         </g>
         <g class="mainChartArea">
           <transition-group tag="g" onerror="" name="fade">
@@ -142,7 +144,7 @@ export default {
     },
     period () {
       return (Array.from(new Set(this.data.map(x => x.period))))
-      // .filter((x) => !(this.yearsOnly && x.search('год') === -1))
+      .filter((x) => !(this.yearsOnly && x.search('год') === -1))
       .sort((a, b) => (a > b) ? -1 : 1)
     },
     rating () {
@@ -165,7 +167,7 @@ export default {
       return (Array.from(new Set(this.data.map(x => x.subject)))).sort((a, b) => (a > b) ? 1 : -1)
     },
     yearsOnly () {
-      return this.currentData[0].period_type === 'Год'
+      return (this.axisZ === 'rating') && (this.data.filter(x => x[this.axisZ] === this.z && x.period_type === 'Год').length > 0)
     }
   },
   methods: {
@@ -282,5 +284,8 @@ h3 {
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
   opacity: 0
+}
+.flip-list-move {
+  transition: transform 1s;
 }
 </style>
