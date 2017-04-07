@@ -2,6 +2,9 @@
   <div v-if="data"
   ref="container"
   class="container">
+    <div class="row">
+      <h3>{{ axis.z[currZ] }}</h3>
+    </div>
     <svg class="chart" :width="chartSize.width" :height="chartSize.height">
       <g>
         <g class="axis axis--y">
@@ -15,7 +18,8 @@
             :x="margin.left"
             dx="-0.35em"
             :y="scaled.y.bandwidth() / 2"
-            dy=".35em">
+            dy=".35em"
+            @mouseover="selected(axisY, item)">
             {{item}}
             </text>
           </g>
@@ -31,28 +35,32 @@
             :x="scaled.x.bandwidth() / 2"
             :y="scaled.y.bandwidth() / 2"
             dy=".35em"
-            >
-            {{item}}
+            @mouseover="selected(axisX, item)">
+              <tspan v-for="(part, part_i) in splitText(item, 20)"
+              :x="scaled.x.bandwidth() / 2"
+              :y="margin.top"
+              :dy="(-part_i - 1) + 'em'"
+              >{{part}}</tspan>
             </text>
           </g>
         </g>
         <g class="mainChartArea">
           <g v-for="(item, i) in currentData"
-          :key="item.period + item.subject"
+          :key="item[item[axisX]] + item[item[axisY]]"
           :transform="'translate(' + scaled.x(item[axisX]) + ',' + scaled.y(item[axisY]) + ')'"
           :height="scaled.y.bandwidth()"
           >
             <rect
-            :key="'rect' + item.period + item.subject"
+            :key="'rect:' + item[item[axisX]] + item[item[axisY]]"
             :x="0"
             y="0"
             :width="scaled.x.bandwidth()"
             :height="scaled.y.bandwidth()"
-            :fill="hslaColor(item[value])"
+            :fill="hslaColor(item)"
             >
             </rect>
             <text
-            :key="'text' + item.period + item.subject"
+            :key="'text:' + item[item[axisX]] + item[item[axisY]]"
             :x="scaled.x.bandwidth() / 2"
             :y="scaled.y.bandwidth() / 2"
             dy=".35em"> {{item[value]}}
@@ -61,9 +69,14 @@
         </g>
       </g>
     </svg>
-    <button type="button" class="btn"
-    @click="currRating=((currRating + 1) % ratings.length)"
-    >{{ ratingTitle }}</button>
+    <div v-if="showNav" class="row">
+      <button type="button" class="btn"
+      @click="currZ=((axis.z.length + currZ - 1) % axis.z.length)"
+      > < </button>
+      <button type="button" class="btn"
+      @click="currZ=((currZ + 1) % axis.z.length)"
+      > > </button>
+    </div>
   </div>
 </template>
 
@@ -79,8 +92,15 @@ export default {
     axisY: {
       default: 'subject'
     },
+    axisZ: {
+      default: 'rating'
+    },
     value: {
       default: 'value'
+    },
+    z: {},
+    showNav: {
+      default: true
     }
   },
   data () {
@@ -88,9 +108,8 @@ export default {
       data: [],
       margin: {
         left: 120,
-        top: 30
+        top: 60
       },
-      currRating: 1,
       rowHeight: 40
     }
   },
@@ -101,7 +120,8 @@ export default {
     axis () {
       return {
         x: this[this.axisX],
-        y: this[this.axisY]
+        y: this[this.axisY],
+        z: this[this.axisZ]
       }
     },
     chartSize () {
@@ -111,26 +131,18 @@ export default {
       }
     },
     currentData () {
-      return this.data.filter((x) => (x.id === this.ratings[this.currRating]))
+      return this.data.filter((x) => (x[this.axisZ] === this[this.axisZ][this.currZ]))
     },
-    maxValue () {
-      return d3.max(this.currentData.map((x) => x[this.value]))
-    },
-    minValue () {
-      return d3.min(this.currentData.filter(x => (x[this.value])).map((x) => x[this.value]))
+    currZ () {
+      return (this.z) ? this.axis.z.indexOf(this.z) : 0
     },
     period () {
       return (Array.from(new Set(this.data.map(x => x.period))))
-      .filter((x) => !(this.yearsOnly && x.search('год') === -1))
+      // .filter((x) => !(this.yearsOnly && x.search('год') === -1))
       .sort((a, b) => (a > b) ? 1 : -1)
     },
-    ratings () {
-      return (Array.from(new Set(this.data.sort((a, b) => (a.period_type < b.period_type) ? -1 : 1).map(x => x.id))))
-    },
-    ratingTitle () {
-      if (this.data[0]) {
-        return (this.data.filter(x => x.id === this.ratings[this.currRating]))[0].title
-      }
+    rating () {
+      return (Array.from(new Set(this.data.sort((a, b) => (a.period_type < b.period_type) ? -1 : 1).map(x => this.getRatingDescr(x)))))
     },
     scaled () {
       return {
@@ -156,6 +168,9 @@ export default {
     ...mapActions([
       'loading'
     ]),
+    getRatingDescr (item) {
+      return item.index_name + ' (' + item.source + ')'
+    },
     fetchData () {
       this.loading(true)
       this.$http.get('all_ratings')
@@ -169,21 +184,57 @@ export default {
           }
         )
         .then((data) => {
-          this.data = data
-          this.initChart()
+          this.data = data.map(x => {
+            x.rating = this.getRatingDescr(x)
+            return x
+          })
           this.loading(false)
         })
     },
-    hslaColor (value) {
-      // const min = 0
-      // const max = 1
-      let h = 90 * (((value || 0) - this.minValue) / (this.maxValue - this.minValue))
+    hslaColor (item) {
+      const measure = 'unit'
+      const min = this.minValue(measure, item[measure])
+      const max = this.maxValue(measure, item[measure])
+      let h = 90 * (((item[this.value] || 0) - min) / (max - min))
       let s = 80
-      let l = (!value) ? 100 : 50
+      let l = (item[this.value]) ? 50 : 100
       let a = 0.8
       return 'hsla(' + h + ',' + s + '%,' + l + '%,' + a + ')'
     },
-    initChart () {
+    maxValue (measure, value) {
+      return this.currentData.filter(x => !(measure) || x[measure] === value)
+      .reduce((r, x) => {
+        r = Math.max(r || 0, x[this.value] || 0, 0)
+        return r
+      }, 0)
+    },
+    minValue (measure, value) {
+      return this.currentData.filter(x => !(measure) || x[measure] === value)
+      .filter(x => x[this.value])
+      .reduce((r, x) => {
+        r = Math.min(r || x[this.value], x[this.value])
+        return r
+      }, null)
+    },
+    ratingTitle (i) {
+      if (this.data[0]) {
+        return (this.data.filter(x => x.id === this.rating[i]))[0].title
+      }
+    },
+    selected (measure, value) {
+      this.$emit('selected', {measure, value})
+    },
+    splitText (text, width) {
+      const words = text.split(/\s+/).reverse()
+      let res = [words[0]]
+      for (let i = 1; i < words.length; i++) {
+        if ((res[res.length - 1]) && (res[res.length - 1] + ' ' + words[i]).length <= width) {
+          res[res.length - 1] = words[i] + ' ' + res[res.length - 1]
+        } else {
+          res[res.length] = words[i]
+        }
+      }
+      return res
     }
   },
   mounted () {
@@ -194,7 +245,6 @@ export default {
 
 <style>
 .chart {
-
   transition: 1s;
 }
 .chart rect {
@@ -211,6 +261,11 @@ export default {
   font-size: 0.7em;
   font-weight: bold;
   transition: 1s;
+}
+.axis g :hover{
+  fill: blue;
+  stroke: blue;
+  transition: 0;
 }
 .chart .axis--y text {
   text-anchor: end;
