@@ -10,21 +10,30 @@
     <svg class="chart" :width="chartSize.width" :height="chartSize.height">
       <g>
         <g class="axis axis--y">
-          <g v-for="(item, i) in axis.y"
-          :key="'y:'+item"
-          :transform="'translate(0,' + scaled.y(item) + ')'"
-          :height="scaled.y.bandwidth()"
-          >
-            <text
-            :key="'ytext:'+item"
-            :x="margin.left"
-            dx="-0.35em"
-            :y="scaled.y.bandwidth() / 2"
-            dy=".35em"
-            @mouseover="selected(axisY, item)">
-            {{item}}
-            </text>
-          </g>
+          <transition-group tag="g" onerror="" name="fade">
+            <g v-for="(item, i) in axis.y"
+            :key="'y:'+item"
+            :transform="'translate(0,' + scaled.y(item) + ')'"
+            :height="scaled.y.bandwidth()"
+            >
+              <rect
+              :key="'yrect:'+item"
+              :width="margin.left"
+              :height="scaled.y.bandwidth()"
+              fill="white"
+              @mouseover="selected(axisY, item)">
+              </rect>
+              <text
+              :key="'ytext:'+item"
+              :x="margin.left"
+              dx="-0.35em"
+              :y="scaled.y.bandwidth() / 2"
+              dy=".35em"
+              >
+              {{item}}
+              </text>
+            </g>
+          </transition-group>
         </g>
         <g class="axis axis--x">
           <transition-group tag="g" onerror="" name="fade">
@@ -33,6 +42,13 @@
             :transform="'translate(' + scaled.x(item) + ', 0)'"
             :height="scaled.y.bandwidth()"
             >
+              <rect
+              :key="'xrect:'+item"
+              :width="scaled.x.bandwidth()"
+              :height="margin.top"
+              fill="white"
+              @mouseover="selected(axisX, item)">
+              </rect>
               <text
               :key="'xtext:'+item"
               :x="scaled.x.bandwidth() / 2"
@@ -161,6 +177,7 @@ export default {
         .domain(this[this.axisY])
         .range([this.margin.top, this.chartSize.height])
         .paddingInner(0.2)
+        .paddingOuter(0.2)
       }
     },
     subject () {
@@ -268,8 +285,8 @@ export default {
   font-weight: bold;
   transition: 1s;
 }
-.axis g :hover{
-  fill: blue;
+.axis g :hover rect {
+  fill: lightblue;
   stroke: blue;
   transition: 0;
 }
