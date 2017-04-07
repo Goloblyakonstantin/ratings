@@ -1,5 +1,10 @@
 <template>
   <div>
+    <div class="col-sm-10 ">
+      <p class="text-center disabled">
+        <small>Для изменения содержимого таблицы наведите указаль мыши на заголовок строки или столбца</small>
+      </p>
+    </div>
     <chart-table
     :axis-y="charts[0].axisY"
     :axis-x="charts[0].axisX"

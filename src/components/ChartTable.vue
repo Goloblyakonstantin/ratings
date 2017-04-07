@@ -139,7 +139,7 @@ export default {
     period () {
       return (Array.from(new Set(this.data.map(x => x.period))))
       // .filter((x) => !(this.yearsOnly && x.search('год') === -1))
-      .sort((a, b) => (a > b) ? 1 : -1)
+      .sort((a, b) => (a > b) ? -1 : 1)
     },
     rating () {
       return (Array.from(new Set(this.data.sort((a, b) => (a.period_type < b.period_type) ? -1 : 1).map(x => this.getRatingDescr(x)))))
@@ -148,7 +148,7 @@ export default {
       return {
         x: d3.scaleBand()
         .domain(this[this.axisX])
-        .range([this.chartSize.width, this.margin.left])
+        .range([this.margin.left, this.chartSize.width])
         .paddingInner(0.1)
         .paddingOuter(0.1),
         y: d3.scaleBand()
