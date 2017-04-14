@@ -1,102 +1,90 @@
 <template>
-  <div class="container">
-    <div v-if="currentData.title">
-      <div class="row">
-        <ul class="list-group">
-          <li v-if="currentData.source" class="list-group-item">
-            <span class="col-md-2 badge badge-default"> {{ currentData.source }} </span>
-            <span class="col-md-9"> {{ currentData.index.name }}, {{ currentData.index.unit }} </span>
-          </li>
-        </ul>
-      </div>
-      <div class="row justify-content-center scroll-x">
-        <table v-if="currentData.names" class="table">
-          <thead class="thead-default">
-            <th v-if="currentData.names.range" class="text-right">
-              {{ currentData.names.range }}
-            </th>
-            <th class="text-left">
-              {{ currentData.names.name }}
-            </th>
-            <th v-if="ifEditMode">
-              <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.period" @click="showAddColumn">
-              </ui-icon-button>
-              <div v-if="ifAddColumn" class="input-group input-group-sm">
-                <ui-autocomplete
-                    floating-label
-                    ref="newPeriodInput"
-                    :minChars="(1)"
-                    :placeholder="currentData.names.period"
-                    :suggestions="availablePeriods"
-                    v-model="newPeriod"
-                ></ui-autocomplete>
-                <button class="input-group-addon" @click="addColumn">OK</button>
-              </div>
-            </th>
-            <th v-for="period in currentData.names.periods" class="text-center">
-              {{ period }}
-            </th>
-          </thead>
-          <tbody>
-            <tr  v-for="(row, i) in currentData.data">
-              <td v-if="currentData.names.range" class="text-right">
-                {{ row.range }}
-              </td>
-              <td class="text-left">
-                {{ row.name }}
-              </td>
-              <td v-if="ifEditMode">
-              </td>
-              <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
-                <div>
-                  <div v-if="!ifEditMode" class="table-value">
-                    <span v-if="(value)" class="badge badge-default">
-                      {{ row.calculated[n].range }}
-                    </span>
-                    {{ value | beautyNumber }}
-                    <span v-if="(row.calculated[n].gain)" :class="{gain: true, negative: isNegative(row.calculated[n].gain)}"> {{ row.calculated[n].gain | gain }} </span>
-                  </div>
-                  <div v-if="ifEditMode">
-                    <input v-model="currentData.data[i].values[n]" type="number" step=0.01 class="form-control form-control-sm">
-                    </input>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="ifEditMode">
-              <td colspan="2">
-                <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.name" @click="showAddRow">
-                </ui-icon-button>
-                <div v-if="ifAddRow" class="input-group input-group-sm">
-                  <ui-autocomplete
-                      floating-label
-                      ref="newNameInput"
-                      :minChars="(1)"
-                      :placeholder="currentData.names.name"
-                      :suggestions="availableSubjects"
-                      v-model="newName"
-                  ></ui-autocomplete>
-                  <button class="input-group-addon" @click="addRow">OK</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+<div class="container">
+  <div v-if="currentData.title">
+    <div class="row">
+      <ul class="list-group">
+        <li v-if="currentData.source" class="list-group-item">
+          <span class="col-md-2 badge badge-default"> {{ currentData.source }} </span>
+          <span class="col-md-9"> {{ currentData.index.name }}, {{ currentData.index.unit }} </span>
+        </li>
+      </ul>
     </div>
-    <div v-if="!currentData.title">
-      <p v-if="ifLoading">
-        Подождите, данные загружаются...
-      </p>
-      <p v-if="!ifLoading">
-        Нет доступа к запрошенным данным. Обратитесь в службу поддержки
-      </p>
+    <div class="row justify-content-center scroll-x">
+      <table v-if="currentData.names" class="table">
+        <thead class="thead-default">
+          <th v-if="currentData.names.range" class="text-right">
+            {{ currentData.names.range }}
+          </th>
+          <th class="text-left">
+            {{ currentData.names.name }}
+          </th>
+          <th v-if="ifEditMode">
+            <ui-icon-button v-if="!ifAddColumn && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.period" @click="showAddColumn">
+            </ui-icon-button>
+            <div v-if="ifAddColumn" class="input-group input-group-sm">
+              <ui-autocomplete floating-label ref="newPeriodInput" :minChars="(1)" :placeholder="currentData.names.period" :suggestions="availablePeriods" v-model="newPeriod"></ui-autocomplete>
+              <button class="input-group-addon" @click="addColumn">OK</button>
+            </div>
+          </th>
+          <th v-for="period in currentData.names.periods" class="text-center">
+            {{ period }}
+          </th>
+        </thead>
+        <tbody>
+          <tr v-for="(row, i) in currentData.data">
+            <td v-if="currentData.names.range" class="text-right">
+              {{ row.range }}
+            </td>
+            <td class="text-left">
+              {{ row.name }}
+            </td>
+            <td v-if="ifEditMode">
+            </td>
+            <td v-for="(value, n) in row.values" class="text-center" @click="editMode = true">
+              <div>
+                <div v-if="!ifEditMode" class="table-value">
+                  <span v-if="(value)" class="badge badge-default">
+                      {{ row.calculated[n].range }}
+                    </span> {{ value | beautyNumber }}
+                  <span v-if="(row.calculated[n].gain)" :class="{gain: true, negative: isNegative(row.calculated[n].gain)}"> {{ row.calculated[n].gain | gain }} </span>
+                </div>
+                <div v-if="ifEditMode">
+                  <input v-model="currentData.data[i].values[n]" type="number" step=0.01 class="form-control form-control-sm">
+                  </input>
+                </div>
+              </div>
+            </td>
+          </tr>
+          <tr v-if="ifEditMode">
+            <td colspan="2">
+              <ui-icon-button v-if="!ifAddRow && ifEditMode" color="default" icon="add" size="small" :tooltip="currentData.names.name" @click="showAddRow">
+              </ui-icon-button>
+              <div v-if="ifAddRow" class="input-group input-group-sm">
+                <ui-autocomplete floating-label ref="newNameInput" :minChars="(1)" :placeholder="currentData.names.name" :suggestions="availableSubjects" v-model="newName"></ui-autocomplete>
+                <button class="input-group-addon" @click="addRow">OK</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+  <div v-if="!currentData.title">
+    <p v-if="ifLoading">
+      Подождите, данные загружаются...
+    </p>
+    <p v-if="!ifLoading">
+      Нет доступа к запрошенным данным. Обратитесь в службу поддержки
+    </p>
+  </div>
+</div>
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import {
+  mapGetters,
+  mapActions
+} from 'vuex'
 
 export default {
   props: {
@@ -104,16 +92,14 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       ifAddColumn: false,
       ifAddRow: false,
-      contextOptions: [
-        {
-          label: 'Добавить',
-          icon: 'add'
-        }
-      ],
+      contextOptions: [{
+        label: 'Добавить',
+        icon: 'add'
+      }],
       newPeriod: '',
       newName: '',
       periodList: [],
@@ -128,13 +114,13 @@ export default {
       'ifEditMode',
       'ifLoading'
     ]),
-    availableSubjects () {
+    availableSubjects() {
       return this.subjectList.filter((x) => this.getData.data.filter((y) => y.name === x).length === 0)
     },
-    availablePeriods () {
+    availablePeriods() {
       return this.periodList.filter((x) => this.getData.names.periods.filter((y) => y === x).length === 0)
     },
-    currentData () {
+    currentData() {
       let res = Object.assign(this.getData)
       if (res.data && res.names && res.names.periods && res.names.periods.length > 0) {
         res.period_val = res.names.periods.map((x, i) => {
@@ -146,11 +132,11 @@ export default {
         res.data.map((x, n) => {
           x.calculated = x.values.map((v, i) => {
             return {
-              gain: ((v)
-              ? v - (
-                x.values.filter((v1, i1) => (i1 > i) && (v1))[0] || v
-              )
-              : 0
+              gain: ((v) ?
+                v - (
+                  x.values.filter((v1, i1) => (i1 > i) && (v1))[0] || v
+                ) :
+                0
               ),
               range: res.data.filter((p) => (p.values[i]) && (p.values[i] >= v)).length
             }
@@ -174,34 +160,34 @@ export default {
       'loading',
       'setData'
     ]),
-    addColumn () {
+    addColumn() {
       if (this.newPeriod && this.newPeriod.trim()) {
         this.dataAddPeriod(this.newPeriod.trim())
       }
       this.addColumnCancel()
     },
-    addColumnCancel () {
+    addColumnCancel() {
       this.ifAddColumn = false
       this.newPeriod = ''
     },
-    addRow () {
+    addRow() {
       if (this.newName && this.newName.trim()) {
         this.dataAddName(this.newName.trim())
       }
       this.addRowCancel()
     },
-    addRowCancel () {
+    addRowCancel() {
       this.ifAddRow = false
       this.newName = ''
     },
-    isNegative (value) {
+    isNegative(value) {
       return ((+value) < 0)
     },
-    setFocus (refname) {
+    setFocus(refname) {
       this.$refs[refname].$children[0].$el.nextElementSibling.focus()
       this.$refs[refname].$children[0].$el.nextElementSibling.select()
     },
-    fetchData () {
+    fetchData() {
       this.loading(true)
       this.setData()
       let newData = this.getData
@@ -228,28 +214,33 @@ export default {
               name: data[0].subject_type,
               period: data[0].period_type
             }
-            newData.saveFunc = function (data) {
+            newData.saveFunc = function(data) {
               let serializedData = data.data.map((x) => x.values.map((v, i) => {
-                return {
-                  table: data.id,
-                  subject: x.name,
-                  period: data.names.periods[i],
-                  value: v || null
-                }
-              }
-              ))
-              .reduce((r, x) => r.concat(x))
-              vm.$http.post('rating', serializedData, {options: {headers: {ContentType: 'application/json'}}})
-              .then(
-                (response) => {
-                  console.log('saved')
-                  vm.fetchData()
-                },
-                (response) => {
-                  vm.doEditMode(true)
-                  vm.loading(false)
-                }
-              )
+                  return {
+                    table: data.id,
+                    subject: x.name,
+                    period: data.names.periods[i],
+                    value: v || null
+                  }
+                }))
+                .reduce((r, x) => r.concat(x))
+              vm.$http.post('rating', serializedData, {
+                  options: {
+                    headers: {
+                      ContentType: 'application/json'
+                    }
+                  }
+                })
+                .then(
+                  (response) => {
+                    console.log('saved')
+                    vm.fetchData()
+                  },
+                  (response) => {
+                    vm.doEditMode(true)
+                    vm.loading(false)
+                  }
+                )
             }
             this.subjectType = newData.names.name
             this.periodType = newData.names.period
@@ -273,35 +264,35 @@ export default {
           this.loading(false)
         )
     },
-    fetchPeriodList () {
+    fetchPeriodList() {
       this.$http.get('periods?period_type=eq.' + this.periodType)
-      .then(
-        (response) => {
-          return response.json()
-        },
-        (response) => {
-          console.log('http error: ', response)
-        }
-      )
-      .then((data) => {
-        this.periodList = data.map((x) => x.period)
-      })
+        .then(
+          (response) => {
+            return response.json()
+          },
+          (response) => {
+            console.log('http error: ', response)
+          }
+        )
+        .then((data) => {
+          this.periodList = data.map((x) => x.period)
+        })
     },
-    fetchSubjectList () {
+    fetchSubjectList() {
       this.$http.get('subjects?subject_type=eq.' + this.subjectType)
-      .then(
-        (response) => {
-          return response.json()
-        },
-        (response) => {
-          console.log('http error: ', response)
-        }
-      )
-      .then((data) => {
-        this.subjectList = data.map((x) => x.subject)
-      })
+        .then(
+          (response) => {
+            return response.json()
+          },
+          (response) => {
+            console.log('http error: ', response)
+          }
+        )
+        .then((data) => {
+          this.subjectList = data.map((x) => x.subject)
+        })
     },
-    dataDeserialize (template, data) {
+    dataDeserialize(template, data) {
       template.names.periods = Array.from(new Set(data.map(x => x.period))).sort((a, b) => (a < b) ? 1 : -1)
       let subjects = Array.from(new Set(data.map(x => x.subject)))
       template.data = Array.from(subjects
@@ -313,47 +304,46 @@ export default {
               return (res.length > 0) ? res[0].value : null
             })
           }
-        }
-        )
+        })
         .sort((a, b) => b.values[0] - a.values[0])
       )
       return template
     },
-    showAddColumn () {
+    showAddColumn() {
       this.ifAddColumn = true
-      this.$nextTick(function () {
+      this.$nextTick(function() {
         this.setFocus('newPeriodInput')
       })
     },
-    showAddRow () {
+    showAddRow() {
       this.ifAddRow = true
-      this.$nextTick(function () {
+      this.$nextTick(function() {
         this.setFocus('newNameInput')
       })
     }
   },
-  mounted () {
+  mounted() {
     this.fetchData()
   },
   filters: {
-    beautyNumber: function (value) {
+    beautyNumber: function(value) {
       const nullSign = '-'
       if (!value ||
         value === undefined ||
         value === Infinity ||
         value === null ||
-        ((typeof (value) !== 'string') && isNaN(value)) ||
+        ((typeof(value) !== 'string') && isNaN(value)) ||
         value === '') {
         return nullSign
       } else {
-        if (typeof (value) === 'string') {
+        if (typeof(value) === 'string') {
           return value
         } else {
           return value.toFixed(2)
         }
       }
     },
-    gain: function (value) {
+    gain: function(value) {
       const valNumber = +value || 0
       if (valNumber === undefined ||
         valNumber === Infinity ||
@@ -375,30 +365,38 @@ export default {
 .container {
   margin-top: 1em;
 }
+
 .list-group {
   width: 100%;
   margin-bottom: 0.5em;
 }
+
 .badge {
   margin-right: 1em;
 }
+
 .gain {
   vertical-align: super;
   font-size: 0.7em;
   color: green;
 }
+
 .negative {
   color: red;
 }
+
 .scroll-x {
   overflow-x: auto;
 }
+
 .table-value {
   min-width: 8em;
 }
+
 ul {
   list-style-type: none;
 }
+
 input {
   min-width: 4em;
 }
