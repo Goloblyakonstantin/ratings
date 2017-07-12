@@ -92,7 +92,7 @@ export default {
       default: ''
     }
   },
-  data() {
+  data () {
     return {
       ifAddColumn: false,
       ifAddRow: false,
@@ -114,13 +114,13 @@ export default {
       'ifEditMode',
       'ifLoading'
     ]),
-    availableSubjects() {
+    availableSubjects () {
       return this.subjectList.filter((x) => this.getData.data.filter((y) => y.name === x).length === 0)
     },
-    availablePeriods() {
+    availablePeriods () {
       return this.periodList.filter((x) => this.getData.names.periods.filter((y) => y === x).length === 0)
     },
-    currentData() {
+    currentData () {
       let res = Object.assign(this.getData)
       if (res.data && res.names && res.names.periods && res.names.periods.length > 0) {
         res.period_val = res.names.periods.map((x, i) => {
@@ -132,11 +132,11 @@ export default {
         res.data.map((x, n) => {
           x.calculated = x.values.map((v, i) => {
             return {
-              gain: ((v) ?
-                v - (
+              gain: ((v)
+                ? v - (
                   x.values.filter((v1, i1) => (i1 > i) && (v1))[0] || v
-                ) :
-                0
+                )
+                : 0
               ),
               range: res.data.filter((p) => (p.values[i]) && (p.values[i] >= v)).length
             }
@@ -160,34 +160,34 @@ export default {
       'loading',
       'setData'
     ]),
-    addColumn() {
+    addColumn () {
       if (this.newPeriod && this.newPeriod.trim()) {
         this.dataAddPeriod(this.newPeriod.trim())
       }
       this.addColumnCancel()
     },
-    addColumnCancel() {
+    addColumnCancel () {
       this.ifAddColumn = false
       this.newPeriod = ''
     },
-    addRow() {
+    addRow () {
       if (this.newName && this.newName.trim()) {
         this.dataAddName(this.newName.trim())
       }
       this.addRowCancel()
     },
-    addRowCancel() {
+    addRowCancel () {
       this.ifAddRow = false
       this.newName = ''
     },
-    isNegative(value) {
+    isNegative (value) {
       return ((+value) < 0)
     },
-    setFocus(refname) {
+    setFocus (refname) {
       this.$refs[refname].$children[0].$el.nextElementSibling.focus()
       this.$refs[refname].$children[0].$el.nextElementSibling.select()
     },
-    fetchData() {
+    fetchData () {
       this.loading(true)
       this.setData()
       let newData = this.getData
@@ -214,33 +214,33 @@ export default {
               name: data[0].subject_type,
               period: data[0].period_type
             }
-            newData.saveFunc = function(data) {
+            newData.saveFunc = function (data) {
               let serializedData = data.data.map((x) => x.values.map((v, i) => {
-                  return {
-                    table: data.id,
-                    subject: x.name,
-                    period: data.names.periods[i],
-                    value: v || null
-                  }
-                }))
-                .reduce((r, x) => r.concat(x))
+                return {
+                  table: data.id,
+                  subject: x.name,
+                  period: data.names.periods[i],
+                  value: v || null
+                }
+              }))
+              .reduce((r, x) => r.concat(x))
               vm.$http.post('rating', serializedData, {
-                  options: {
-                    headers: {
-                      ContentType: 'application/json'
-                    }
+                options: {
+                  headers: {
+                    ContentType: 'application/json'
                   }
-                })
-                .then(
-                  (response) => {
-                    console.log('saved')
-                    vm.fetchData()
-                  },
-                  (response) => {
-                    vm.doEditMode(true)
-                    vm.loading(false)
-                  }
-                )
+                }
+              })
+              .then(
+                (response) => {
+                  console.log('saved')
+                  vm.fetchData()
+                },
+                (response) => {
+                  vm.doEditMode(true)
+                  vm.loading(false)
+                }
+              )
             }
             this.subjectType = newData.names.name
             this.periodType = newData.names.period
@@ -264,7 +264,7 @@ export default {
           this.loading(false)
         )
     },
-    fetchPeriodList() {
+    fetchPeriodList () {
       this.$http.get('periods?period_type=eq.' + this.periodType)
         .then(
           (response) => {
@@ -278,7 +278,7 @@ export default {
           this.periodList = data.map((x) => x.period)
         })
     },
-    fetchSubjectList() {
+    fetchSubjectList () {
       this.$http.get('subjects?subject_type=eq.' + this.subjectType)
         .then(
           (response) => {
@@ -292,7 +292,7 @@ export default {
           this.subjectList = data.map((x) => x.subject)
         })
     },
-    dataDeserialize(template, data) {
+    dataDeserialize (template, data) {
       template.names.periods = Array.from(new Set(data.map(x => x.period))).sort((a, b) => (a < b) ? 1 : -1)
       let subjects = Array.from(new Set(data.map(x => x.subject)))
       template.data = Array.from(subjects
@@ -309,41 +309,41 @@ export default {
       )
       return template
     },
-    showAddColumn() {
+    showAddColumn () {
       this.ifAddColumn = true
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         this.setFocus('newPeriodInput')
       })
     },
-    showAddRow() {
+    showAddRow () {
       this.ifAddRow = true
-      this.$nextTick(function() {
+      this.$nextTick(function () {
         this.setFocus('newNameInput')
       })
     }
   },
-  mounted() {
+  mounted () {
     this.fetchData()
   },
   filters: {
-    beautyNumber: function(value) {
+    beautyNumber: function (value) {
       const nullSign = '-'
       if (!value ||
         value === undefined ||
         value === Infinity ||
         value === null ||
-        ((typeof(value) !== 'string') && isNaN(value)) ||
+        ((typeof (value) !== 'string') && isNaN(value)) ||
         value === '') {
         return nullSign
       } else {
-        if (typeof(value) === 'string') {
+        if (typeof (value) === 'string') {
           return value
         } else {
           return value.toFixed(2)
         }
       }
     },
-    gain: function(value) {
+    gain: function (value) {
       const valNumber = +value || 0
       if (valNumber === undefined ||
         valNumber === Infinity ||
