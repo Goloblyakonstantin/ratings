@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Chart from '@/components/Chart'
+import PieChart from '@/components/PieChart'
 import RatingList from '@/components/RatingList'
 import TableView from '@/components/TableView'
 
@@ -18,6 +19,12 @@ export default new Router({
       path: '/chart',
       name: 'Chart',
       component: Chart,
+      props: true
+    },
+    {
+      path: '/piechart/:id',
+      name: 'PieChart',
+      component: PieChart,
       props: true
     },
     {
