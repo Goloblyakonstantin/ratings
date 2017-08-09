@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Chart from '@/components/Chart'
-import PieChart from '@/components/PieChart'
+import PieChart from '@/components/PieChartN'
 import RatingList from '@/components/RatingList'
 import TableView from '@/components/TableView'
 

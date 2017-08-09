@@ -4,16 +4,19 @@
       <div class="row justify-content-center">
         <div class="col list-group">
           <div v-for="rating in currentData" class="row list-group-item">
-            <span class="col-12">
-              <router-link :to="{ name: 'TableView', params: { id: rating.id }}">{{ rating.title }}</router-link>
-            </span>
-            <span class="col-2 badge badge-default">
-              {{ rating.source }}
-            </span>
-            <span class="small">
-              {{ rating.index_name }},
-              {{ rating.unit }}
-            </span>
+              <span class="col-12">
+                <router-link :to="{ name: 'TableView', params: { id: rating.id }}">{{ rating.title }}</router-link>
+              </span>
+              <span class="col-2 badge badge-default">
+                {{ rating.source }}
+              </span>
+              <span class="small" style="margin-left: 10px">
+                {{ rating.index_name }},
+                {{ rating.unit }}
+              </span>
+              <span class="col-12">
+                <router-link :to="{ name: 'PieChart', params: { id: rating.id }}">Диаграмма</router-link>
+              </span>
           </div>
         </div>
       </div>

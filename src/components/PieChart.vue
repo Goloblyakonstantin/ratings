@@ -9,25 +9,29 @@
     </div>
         <svg class="chart" :width="chartSize.width" :height="chartSize.height">
         <g class="mainChartArea">
-              <g :transform="'translate(' + (chartSize.width / 2) + ',' + (chartSize.height / 2) + ')'">
-                <g v-for="(item, i) in arcs" class="arc"
+            <transition-group name="fade" tag="g" :transform="'translate(' + (chartSize.width / 2) + ',' + (chartSize.height / 2) + ')'">
+              <g v-for="(item, i) in arcs" class="arc"
+              :key="'g:'+colors(scaled.pie[i])"
+              >
+                <path
+                :d="item.path"
+                :key="'arc:'+colors(scaled.pie[i])"
+                :fill="colors(scaled.pie[i])"
+                :transform="(isHighlighted(scaled.pie[i])) ? transformSlice(scaled.pie[i]) : ''"
                 >
-                  <path
-                  :d="item"
-                  :fill="colors(scaled.pie[i])"
-                  :transform="(isHighlighted(scaled.pie[i])) ? transformSlice(scaled.pie[i]) : ''"
-                  >
-                  </path>
-                  <text
-                  :transform="transformLabel(scaled.pie[i])"
-                  >
-                    {{scaled.pie[i].value}} - {{scaled.pie[i].data.subject}}: {{hash(scaled.pie[i].data.subject)}}
-                  </text>
+                </path>
+                <text
+                :transform="transformLabel(scaled.pie[i])"
+                :key="'t:'+colors(scaled.pie[i])"
+                >
+                  {{scaled.pie[i].value}} - {{scaled.pie[i].data.subject}}: {{hash(scaled.pie[i].data.subject)}}
+                </text>
               </g>
-              <text>
-                {{label}}
-              </text>
-            </g>
+            </transition-group>
+            <text>
+              {{label}}
+            </text>
+
         </g>
       </svg>
     <div v-if="showNav" class="row">
@@ -97,7 +101,10 @@ export default {
   },
   computed: {
     arcs () {
-      return this.scaled.pie.map((d) => this.path(d))
+      return this.scaled.pie.map((d) => {
+        return {key: d.data.subject,
+          path: this.path(d)}
+      })
     },
     axis () {
       return {
@@ -284,9 +291,16 @@ export default {
 </script>
 
 <style>
-path {
-  transition: all 2s;
+
+.fade-enter-active, .fade-leave-active {
+  transition: 1s;
+  transform: rotate(0deg);
 }
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0;
+  transform: rotate(-60deg);
+}
+
 
 .arc text {
   font: 10px sans-serif;

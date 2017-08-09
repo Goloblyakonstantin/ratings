@@ -8,6 +8,7 @@
           <span class="col-md-9"> {{ currentData.index.name }}, {{ currentData.index.unit }} </span>
         </li>
       </ul>
+      <router-link :to="{ name: 'PieChart', params: { id: id }}">Диаграмма</router-link>
     </div>
     <div class="row justify-content-center scroll-x">
       <table v-if="currentData.names" class="table">

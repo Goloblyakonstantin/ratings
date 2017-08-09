@@ -1,7 +1,7 @@
 <template>
   <div v-if="data"
   ref="container"
-  class="container">
+  class="container scroll-x">
     <div class="row">
       <transition name="fade" mode="out-in">
         <h3>{{ axis.z[currZ] }}</h3>
@@ -148,7 +148,7 @@ export default {
     },
     chartSize () {
       return {
-        width: 800,
+        width: 2000,
         height: this.rowHeight * this[this.axisY].length
       }
     },
