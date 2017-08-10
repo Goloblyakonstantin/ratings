@@ -29,7 +29,7 @@
                 :y="item.labelPos.y"
                 :key="'t:'+item.id"
                 >
-                  {{ item.value }}
+                  {{item.id}}: {{ item.value }}
                 </text>
               </g>
               <circle
@@ -61,12 +61,42 @@
         </transition-group>
       </div>
     </div>
-    <button type="button" class="btn"
-    @click="current = (current + 1) % data.length"
-    > < </button>
-    <button type="button" class="btn"
-    @click="current = (current + data.length - 1) % data.length"
-    > > </button>
+    <div>
+      <svg :width="chartWidth" height="3em">
+        <g v-for="(per, i) in data"
+        class="elevation"
+        :class="{'elevation-active': current === i}"
+        @click="current = i">
+          <rect class="bg"
+            :x="i * chartWidth / data.length"
+            y="0"
+            :width="chartWidth / data.length" fill="transparent" height="2em">
+          </rect>
+          <rect class="line"
+            :x="(i + 0.5) * chartWidth / data.length"
+            y="0"
+            width="1"
+            :height="((per[0].period.indexOf('год') > -1) ? 1 : 0.6) + 'em'"
+            fill="black" shape-rendering="crispEdges"
+          >
+          </rect>
+          <text class="elevation-text"
+          v-if="(per[0].period.indexOf('год') > -1)"
+          :x="(i + 0.5) * chartWidth / data.length"
+          y="4em"
+          >
+          {{per[0].period.substring(0, 4)}}
+          </text>
+        </g>
+        <rect
+          x="0" y="0"
+          width="100%"
+          height="1"
+          fill="black" shape-rendering="crispEdges"
+        >
+        </rect>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -254,6 +284,7 @@ export default {
               .filter((px, pi, pself) => pi <= this.count)
             )
           this.loading(false)
+          this.setDefaults()
         })
     },
     hash (text) {
@@ -268,6 +299,12 @@ export default {
     },
     rateToDash (rate) {
       return this.radius * rate * Math.PI * 2
+    },
+    setDefaults () {
+      const id = this.allIDs.indexOf(this.highligtedSubject)
+      if (id > -1) {
+        this.active = id
+      }
     },
     showValue (item) {
       return item.value || ((item.rate * 100).toFixed(this.decimals) + '%')
@@ -289,7 +326,6 @@ export default {
   opacity: 0;
   transition: 1s;
   font: 0.8em;
-  font-weight: bold;
   text-anchor: middle;
   transform: rotate(90);
 }
@@ -297,6 +333,7 @@ export default {
   stroke-width: 48%;
 }
 .arc-active text {
+  font-weight: bold;
   opacity: 1;
 }
 .arc:hover circle {
@@ -308,7 +345,26 @@ export default {
   opacity: 1;
   lighting-color: white;
 }
-
+.elevation:hover .bg{
+  fill: #eee;
+  stroke: #eee;
+  stroke-width: 6;
+}
+.elevation:hover .line{
+  stroke: black;
+  stroke-width: 2;
+}
+.elevation-text {
+  font-size: 0.5em;
+  text-anchor: middle;
+}
+.elevation:hover .elevation-text{
+  font-size: 0.7em;
+}
+.elevation-active .bg{
+  fill: #eee;
+  stroke: #eee;
+}
 .slide-fade-enter-active {
   transition: all .3s ease;
 }
