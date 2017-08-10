@@ -87,6 +87,12 @@ export default {
     highligtColor: {
       default: 'red'
     },
+    othersName: {
+      default: 'Прочие'
+    },
+    othersColor: {
+      default: 'gray'
+    },
     cuttedValue: {
       default: 0.1
     }
@@ -112,10 +118,16 @@ export default {
       return 1
     },
     allIDs () {
-      return this.data.reduce((r, x) => {
+      let ids = this.data.reduce((r, x) => {
         return r.concat(x.map((xx) => xx.id))
           .filter((xx, ii, self) => self.indexOf(xx) === ii)
       }, [])
+      const otherPos = ids.indexOf(this.othersName)
+      if (otherPos > -1) {
+        ids.splice(otherPos, 1)
+        ids.push(this.othersName)
+      }
+      return ids
     },
     arcs () {
       return this.data.map((x) => {
@@ -185,7 +197,11 @@ export default {
     },
     color (id) {
       let hash = this.hash(id)
-      return (this.highligtedSubject === id) ? this.highligtColor : ('hsla(' + (hash) + ',100%,50%,1)')
+      return (this.highligtedSubject === id)
+        ? this.highligtColor
+        : (this.othersName === id)
+          ? this.othersColor
+          : ('hsla(' + (hash) + ',100%,50%,1)')
     },
     getRatingDescr (item) {
       return item.index_name + ' (' + item.source + ')'
@@ -219,13 +235,23 @@ export default {
             .filter((x, i, self) => self.indexOf(x) === i)
             .sort((a, b) => (a < b) ? 1 : -1)
             .map((period) => data.filter((x) => x.period === period)
+              .sort((a, b) => (b.value || 0) - (a.value || 0))
               .map((x, i, self) => {
+                const total = self.reduce((r, xx) => r + (xx.value || 0), 0)
+                if (i === this.count) {
+                  x.subject = this.othersName
+                  x.value = (
+                    (this.description.unit === '%')
+                    ? (100 - self.filter((px, pi, pself) => pi < this.count).reduce((r, xx) => r + (xx.value || 0), 0))
+                    : total - self.filter((px, pi, pself) => pi < this.count).reduce((r, xx) => r + (xx.value || 0), 0)
+                  ).toFixed(this.decimals)
+                }
                 x.rate = (this.description.unit === '%') ? x.value / 100
-                  : x.value / self.reduce((r, xx) => r + (xx.value || 0), 0)
+                  : x.value / total
                 x.id = x.subject
                 return x
               })
-              .sort((a, b) => (b.value || 0) - (a.value || 0))
+              .filter((px, pi, pself) => pi <= this.count)
             )
           this.loading(false)
         })
@@ -300,6 +326,7 @@ li {
 }
 .li-active {
   font-weight: bold;
+  font-size: 1em;
 }
 .li-text {
   color: black;
