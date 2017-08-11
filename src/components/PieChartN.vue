@@ -11,25 +11,25 @@
           <g class="mainChartArea" :transform="'translate(' + (chartWidth / 2) + ',' + (chartHeight / 2) + ')'">
             <g class="pie-chart" transform="rotate(-90)">
               <g
+              v-for="(id, i) in allIDs"
               class="arc"
-              :class="{'arc-active': isActive(i)}"
-              v-for="(item, i) in arcs[current]"
-              @click="active = (active === i) ? null : i"
+              :class="{'arc-active': isActive(id)}"
+              @click="active = (active === id) ? null : id"
               >
                 <circle
                 :r="radius" fill="transparent"
-                :key="item.id"
-                :stroke="color(item.id)"
-                :stroke-dasharray="item.dash"
-                :stroke-dashoffset="item.offset"
+                :key="'a:'+ i"
+                :stroke="color(id)"
+                :stroke-dasharray="getItem(i).dash"
+                :stroke-dashoffset="getItem(i).offset"
                 />
                 <text
                 transform="rotate(90)"
-                :x="item.labelPos.x"
-                :y="item.labelPos.y"
-                :key="'t:'+item.id"
+                :x="getItem(i).labelPos.x"
+                :y="getItem(i).labelPos.y"
+                :key="'t:'+ i"
                 >
-                  {{item.id}}: {{ item.value }}
+                  {{getItem(i).id}}: {{ getItem(i).value }}
                 </text>
               </g>
               <circle
@@ -51,10 +51,10 @@
         <transition-group tag="ul" name="slide-fade">
           <li v-for="(item, i) in arcs[current]"
           v-if="item.rate > 0"
-          :key="item.id"
-          :style="'color: ' + color(item.id)"
-          :class="{'li-active': isActive(i)}"
-          @click="active = (active === i) ? null : i"
+          :key="'l:'+ item.nid"
+          :style="'color: ' + color(item.id)+'; transition-delay: ' + 100 * i + 'ms'"
+          :class="{'li-active': isActive(item.id)}"
+          @click="active = (active === item.id) ? null : item.id"
           >
             <span class="li-text">{{ item.id }}</span>
           </li>
@@ -126,7 +126,7 @@ export default {
       default: 'Прочие'
     },
     othersColor: {
-      default: 'gray'
+      default: '#eee'
     },
     cuttedValue: {
       default: 0.1
@@ -177,9 +177,14 @@ export default {
           return Object.keys(item).length === 0 ? defItem : item
         }
         )
+        .sort((a, b) =>
+          ((b.id === this.othersName) ? -1 : b.rate) -
+            ((a.id === this.othersName) ? -1 : a.rate)
+        )
         .map((xx, ii, self) => {
           return {
             id: xx.id,
+            nid: this.allIDs.indexOf(xx.id),
             dash: this.arc(xx.rate || 0),
             rate: xx.rate || 0,
             value: this.showValue(xx),
@@ -237,6 +242,11 @@ export default {
         : (this.othersName === id)
           ? this.othersColor
           : ('hsla(' + (hash) + ',100%,50%,1)')
+    },
+    getItem (i) {
+      if (this.arcs) {
+        return this.arcs[this.current].filter((x) => x.nid === i)[0]
+      }
     },
     getRatingDescr (item) {
       return item.index_name + ' (' + item.source + ')'
@@ -299,8 +309,8 @@ export default {
         return a & a
       }, 0)
     },
-    isActive (i) {
-      return i === this.active
+    isActive (id) {
+      return id === this.active
     },
     rateToDash (rate) {
       return this.radius * rate * Math.PI * 2
@@ -308,7 +318,7 @@ export default {
     setDefaults () {
       const id = this.allIDs.indexOf(this.highligtedSubject)
       if (id > -1) {
-        this.active = id
+        this.active = this.highligtedSubject
       }
     },
     showValue (item) {
@@ -325,7 +335,7 @@ export default {
 .arc circle {
   stroke-width: 40%;
   stroke-opacity: 0.4;
-  transition: 0.6s;
+  transition: stroke-dasharray 0.6s ease, stroke-dashoffset 0.3s ease 0.6s;
 }
 .arc text {
   opacity: 0;
@@ -333,6 +343,7 @@ export default {
   font: 0.8em;
   text-anchor: middle;
   transform: rotate(90);
+  transition: 1s;
 }
 .arc-active circle {
   stroke-width: 48%;
@@ -378,16 +389,20 @@ export default {
   stroke: #ffd;
 }
 .slide-fade-enter-active {
-  transition: all .3s ease;
+  transition: all 1s ease;
 }
 .slide-fade-leave-active {
-  transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  transition: all 1s ease;
 }
 .slide-fade-enter, .slide-fade-leave-to
 /* .slide-fade-leave-active below version 2.1.8 */ {
-  transform: translateX(10px);
+  transform: scaleY(-1);
   opacity: 0;
 }
+.slide-fade-move {
+  transition: transform 1s;
+}
+
 li {
   list-style-type: square;
   font-size: 1em;
