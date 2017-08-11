@@ -206,22 +206,24 @@ export default {
         let L = []
         for (let i = 0; i < s.length; i++) {
           let ord = s.charCodeAt(i)
-          L.push(charEncodeCache[s[i]] || '%' + DMap[ord].toString(16))
+          L.push(charEncodeCache[s[i]] || ('%' + DMap[ord].toString(16)))
         }
         return L.join('').toUpperCase()
       }
 
-      let csvContent = JSON.stringify(this.currentData.names.name) + this.csvFieldDelimiter
-      csvContent += this.currentData.names.periods.join(this.csvFieldDelimiter) + '\n'
-      csvContent += this.currentData.data.map((d) => {
-        return JSON.stringify(d.name) +
-          d.values.reduce((r, v) => r + this.csvFieldDelimiter + JSON.stringify(v || '-')
-            .replace(/\./, this.csvDecimalDelimiter), '')
-      })
-      .join('\n')
-      .replace(/(^\{)|(\}$)/mg, '')
-      // window.open(encodeURI(csvContent))
-      return encodeURI('data:text/csv;charset=windows-1251,') + unicodeToWin1251UrlEncoded(csvContent)
+      if (this.currentData && this.currentData.names.periods) {
+        let csvContent = JSON.stringify(this.currentData.names.name) + this.csvFieldDelimiter
+        csvContent += this.currentData.names.periods.join(this.csvFieldDelimiter) + '\n'
+        csvContent += this.currentData.data.map((d) => {
+          return JSON.stringify(d.name) +
+            d.values.reduce((r, v) => r + this.csvFieldDelimiter + JSON.stringify(v || '-')
+              .replace(/\./, this.csvDecimalDelimiter), '')
+        })
+        .join('\n')
+        .replace(/(^\{)|(\}$)/mg, '')
+        // window.open(encodeURI(csvContent))
+        return encodeURI('data:text/csv;charset=windows-1251,') + unicodeToWin1251UrlEncoded(csvContent)
+      }
     },
     isNegative (value) {
       return ((+value) < 0)
