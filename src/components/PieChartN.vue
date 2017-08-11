@@ -61,19 +61,24 @@
         </transition-group>
       </div>
     </div>
+    <div class="row">
+      <div class="col-6">
+        <h5><small>Выбрать период</small></h5>
+      </div>
+    </div>
     <div>
-      <svg :width="chartWidth" height="3em">
+      <svg :width="chartWidth * 2" height="6em">
         <g v-for="(per, i) in data"
         class="elevation"
         :class="{'elevation-active': current === i}"
         @click="current = i">
           <rect class="bg"
-            :x="i * chartWidth / data.length"
+            :x="i * chartWidth *2 / data.length"
             y="0"
-            :width="chartWidth / data.length" fill="transparent" height="2em">
+            :width="chartWidth *2 / data.length" fill="transparent" height="4em">
           </rect>
           <rect class="line"
-            :x="(i + 0.5) * chartWidth / data.length"
+            :x="(i + 0.5) * chartWidth *2 / data.length"
             y="0"
             width="1"
             :height="((per[0].period.indexOf('год') > -1) ? 1 : 0.6) + 'em'"
@@ -82,8 +87,8 @@
           </rect>
           <text class="elevation-text"
           v-if="(per[0].period.indexOf('год') > -1)"
-          :x="(i + 0.5) * chartWidth / data.length"
-          y="4em"
+          :x="(i + 0.5) * chartWidth *2 / data.length"
+          y="3em"
           >
           {{per[0].period.substring(0, 4)}}
           </text>
@@ -345,25 +350,32 @@ export default {
   opacity: 1;
   lighting-color: white;
 }
+.elevation *{
+  transition: 0.5s;
+}
+.elevation .bg {
+  stroke: transparent;
+  stroke-width: 6;
+}
 .elevation:hover .bg{
   fill: #eee;
   stroke: #eee;
   stroke-width: 6;
 }
 .elevation:hover .line{
-  stroke: black;
+  stroke: #777;
   stroke-width: 2;
 }
 .elevation-text {
-  font-size: 0.5em;
+  font-size: 0.9em;
   text-anchor: middle;
 }
 .elevation:hover .elevation-text{
-  font-size: 0.7em;
+  font-size: 1.2em;
 }
 .elevation-active .bg{
-  fill: #eee;
-  stroke: #eee;
+  fill: #ff6;
+  stroke: #ffd;
 }
 .slide-fade-enter-active {
   transition: all .3s ease;
@@ -378,11 +390,11 @@ export default {
 }
 li {
   list-style-type: square;
-  font-size: 0.8em;
+  font-size: 1em;
 }
 .li-active {
   font-weight: bold;
-  font-size: 1em;
+  font-size: 1ю2em;
 }
 .li-text {
   color: black;
